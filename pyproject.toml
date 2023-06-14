@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "data-centric-synth"
 version = "0.0.0"
 authors = [
-  {name = "Anon", email = "Anon"}
+  {name = "Anon", email = "Anon@anon.com"}
 ]
 description = "Data Centric Synth"
 classifiers = [
@@ -25,6 +25,9 @@ dependencies = [
   "catboost",
   "cleanlab",
   "igraph",
+  "plotnine",
+  "patchworklib",
+  "seaborn",
 ]
 
 [project.license]

@@ -27,7 +27,7 @@ To run the main experiment, run the following file:
 python src/application/main_experiment/run_main_experiment.py
 ```
 
-Note, this will take a long time and require a GPU (~6000-10.000 GPU hours). 
+Note, this will take a long time and require a GPU (~600-1.000 GPU hours). 
 Modify the number of seeds/generative models in the file for faster training.
 
 

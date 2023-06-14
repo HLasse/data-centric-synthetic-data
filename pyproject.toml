@@ -1,0 +1,161 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-centric-synth"
+version = "0.0.0"
+authors = [
+  {name = "Anon", email = "Anon"}
+]
+description = "Data Centric Synth"
+classifiers = [
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10"
+]
+requires-python = ">=3.7"
+dependencies = [
+  "pydantic",
+  "synthcity",
+  "openml",
+  "catboost",
+  "cleanlab",
+  "igraph",
+]
+
+[project.license]
+file = "LICENSE"
+name = "MIT"
+
+[project.optional-dependencies]
+dev = [
+  "pylint",
+  "mypy",
+  "pre-commit==3.3.2",
+  "ruff==0.0.270", # important that these match the pre-commit hooks
+  "black==23.3.0", # important that these match the pre-commit hooks
+  "pandas-stubs",
+]
+
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+homepage = "anon"
+repository = "anon"
+documentation = "anon"
+
+[tool.mypy]
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_unreachable = true
+plugins = "pydantic.mypy"
+
+[tool.pydantic-mypy]
+init_typed = true
+warn_untyped_fields = true
+
+[tool.ruff]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = [
+  "A",
+  "ANN",
+  "ARG",
+  "B",
+  "C4",
+  "COM",
+  "D417",
+  "E",
+  "ERA",
+  "F",
+  "I",
+  "ICN",
+  "NPY001",
+  "PD002",
+  "PIE",
+  "PLE",
+  "PLW",
+  "PT",
+  "UP",
+  "Q",
+  "PTH",
+  "RSE",
+  "RET",
+  "RUF",
+  "SIM",
+  "W"
+]
+ignore = [
+  "ANN101",
+  "ANN401",
+  "E402",
+  "E501",
+  "F401",
+  "F841",
+  "RET504",
+  "UP006",
+  "UP035",
+]
+ignore-init-module-imports = true
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+unfixable = ["ERA"]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "__init__.py"
+]
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+target-version = "py39"
+
+[tool.ruff.flake8-annotations]
+mypy-init-return = true
+suppress-none-returning = true
+
+[tool.ruff.isort]
+known-third-party = ["wandb"]
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+[tool.ruff.per-file-ignores]
+# "src/data_centric_synth/dataiq/dataiq_original.py"
+
+[tool.semantic_release]
+branch = "main"
+version_variable = [
+  "pyproject.toml:version"
+]
+upload_to_pypi = false
+upload_to_release = false
+build_command = "python -m pip install build; python -m build"
+
+[tool.setuptools]
+include-package-data = true

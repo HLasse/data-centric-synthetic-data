@@ -1,0 +1,6 @@
+Generative Model,"mean (lower, upper)"
+bayesian_network,"0.998 (0.998, 0.999)"
+ctgan,"0.979 (0.967, 0.987)"
+ddpm,"0.846 (0.691, 0.971)"
+nflow,"0.975 (0.967, 0.982)"
+tvae,"0.966 (0.952, 0.979)"

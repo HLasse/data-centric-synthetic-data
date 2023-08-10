@@ -20,3 +20,4 @@ __pycache__/
 /build
 results/experiment3/intermediate/aggregated_stat_fid.csv
 results/experiment3/intermediate/normalized_stat_fid.csv
+*.pyc

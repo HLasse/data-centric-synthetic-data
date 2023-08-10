@@ -119,7 +119,7 @@ def calculate_feature_ranking_distance(
     # have been applied at this point
     real_data_feature_ranking = (
         overall_performance_df.query(
-            "synthetic_model_type == 'None' & data_centric_method == 'cleanlab'",
+            "synthetic_model_type == 'None' & postprocessing_strategy != 'no_hard' & data_centric_method == 'cleanlab'",
         )
         .groupby(["dataset_id", "feature"])
         .agg({"importance": "mean"})
@@ -144,7 +144,7 @@ def calculate_feature_ranking_distance(
     # synthetic_model_type, and random_seed, get the rank of the feature selection
 
     ranked_df = (
-        overall_performance_df.query("synthetic_model_type != 'None'")
+        overall_performance_df.query("synthetic_model_type != 'None' | postprocessing_strategy == 'no_hard'")
         .groupby(
             [
                 "dataset_id",

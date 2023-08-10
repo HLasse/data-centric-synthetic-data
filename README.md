@@ -44,7 +44,7 @@ To run the experiment on adding label noise to the Covid mortality dataset, run 
 python src/application/main_experiment/run_noise_experiment.py
 ```
 
-To run hyperparameter tuning of generative omdels, run the following file:
+To run hyperparameter tuning of generative models, run the following file:
 
 ```python
 python src/application/synthcity_hparams/optimize_model_hparams.py

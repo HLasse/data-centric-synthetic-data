@@ -7,7 +7,6 @@ import plotnine as pn
 from application.constants import DATA_DIR, RESULTS_DIR
 from application.main_experiment.eval.summary_table import (
     aggregate_performance_across_tasks_no_merging,
-    get_performance_dfs,
     rename_easy_ambi_to_no_hard,
     rename_easy_ambiguous_hard_to_easy_ambi_hard,
 )
@@ -16,6 +15,8 @@ from data_centric_synth.experiments.models import (
     IMPLEMENTED_DATA_CENTRIC_METHODS,
     get_default_synthetic_model_suite,
 )
+
+from data_centric_synth.evaluation.summary_helpers import get_performance_dfs
 
 
 def plot_line_facet(df: pd.DataFrame) -> pn.ggplot:

@@ -1,31 +1,19 @@
 """Code to produce the plots for the experiment of adding label noise to the Covid mortality dataset"""
-from typing import List, Literal
+from typing import List
 
 import numpy as np
 import pandas as pd
 import plotnine as pn
-from plotnine.stats.stat_summary import mean_cl_boot
-from pydantic import BaseModel
-
 from application.constants import DATA_DIR, RESULTS_DIR
-from data_centric_synth.data_models.experiment3 import Experiment3Suite
-from data_centric_synth.evaluation.classification_performance import (
-    get_classification_performance_df,
-)
+from data_centric_synth.evaluation.data_objects import NoisePerformanceDfs
 from data_centric_synth.evaluation.extraction import get_experiment3_suite
-from data_centric_synth.evaluation.feature_selection import (
-    get_feature_selection_performance,
-)
-from data_centric_synth.evaluation.model_selection import (
-    get_model_selection_performance_df,
-)
-from data_centric_synth.evaluation.statistical_fidelity import (
-    get_statistical_fidelity_performance_df,
-)
 from data_centric_synth.experiments.models import (
     IMPLEMENTED_DATA_CENTRIC_METHODS,
     get_default_synthetic_model_suite,
 )
+from plotnine.stats.stat_summary import mean_cl_boot
+
+from data_centric_synth.evaluation.summary_helpers import get_noise_performance_dfs
 
 pd.set_option("mode.chained_assignment", None)
 
@@ -141,52 +129,6 @@ def aggregate_and_make_pretty(
     return round_and_combine(aggregated, digits=digits)
 
 
-class PerformanceDfs(BaseModel):
-    classification: pd.DataFrame
-    model_selection: pd.DataFrame
-    feature_selection: pd.DataFrame
-    statistical_fidelity: pd.DataFrame
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-def get_performance_dfs(
-    data_centric_methods: List[Literal[IMPLEMENTED_DATA_CENTRIC_METHODS]],
-    synthetic_models: List[str],
-    experiment_suite: Experiment3Suite,
-) -> PerformanceDfs:
-    classification_performance_df = get_classification_performance_df(
-        experiment_suite=experiment_suite,
-        synthetic_models=synthetic_models,
-        data_centric_methods=data_centric_methods,
-    )
-
-    model_selection_df = get_model_selection_performance_df(
-        experiment_suite=experiment_suite,
-        synthetic_models=synthetic_models,
-        data_centric_methods=data_centric_methods,
-    )
-
-    feature_selection_df = get_feature_selection_performance(
-        experiment_suite=experiment_suite,
-        synthetic_models=synthetic_models,
-        data_centric_methods=data_centric_methods,
-    )
-    statistical_fidelity_df = get_statistical_fidelity_performance_df(
-        experiment_suite=experiment_suite,
-        synthetic_models=synthetic_models,
-        data_centric_methods=data_centric_methods,
-    )
-
-    return PerformanceDfs(
-        classification=classification_performance_df,
-        model_selection=model_selection_df,
-        feature_selection=feature_selection_df,
-        statistical_fidelity=statistical_fidelity_df,
-    )
-
-
 def aggregate_performance_across_tasks(
     classification_performance_df: pd.DataFrame,
     model_selection_df: pd.DataFrame,
@@ -276,7 +218,9 @@ def aggregate_performance_across_tasks_no_merging(
     )
 
 
-def find_dataset_with_max_classification_diff(performance_dfs: PerformanceDfs) -> str:
+def find_dataset_with_max_classification_diff(
+    performance_dfs: NoisePerformanceDfs,
+) -> str:
     dataset_performance = aggregate_ranking(
         performance_df=performance_dfs.classification.query(
             "data_centric_method == 'cleanlab' & classification_model_type == 'XGBClassifier' & metric == 'roc_auc'"
@@ -337,7 +281,9 @@ def aggregated_table_to_latex(aggregated_table: pd.DataFrame) -> None:
     print(latex_str)
 
 
-def rename_easy_ambi_to_no_hard(performance_dfs: PerformanceDfs) -> PerformanceDfs:
+def rename_easy_ambi_to_no_hard(
+    performance_dfs: NoisePerformanceDfs,
+) -> NoisePerformanceDfs:
     performance_dfs.classification[
         "postprocessing_strategy"
     ] = performance_dfs.classification["postprocessing_strategy"].replace(
@@ -376,11 +322,11 @@ if __name__ == "__main__":
     # save_to_pickle(experiment_suite, RESULTS_DIR / "experiment3" / "experiment_suite.pkl")
 
     ## Performance on noisy data
-    #NOISY_DATASETS_DIR = RESULTS_DIR / "experiment3" / "noise_data"
+    # NOISY_DATASETS_DIR = RESULTS_DIR / "experiment3" / "noise_data"
     NOISY_DATASETS_DIR = DATA_DIR / "main_experiment" / "noise_data"
     noise_experiment_suite = get_experiment3_suite(NOISY_DATASETS_DIR)
 
-    noise_performance_dfs = get_performance_dfs(
+    noise_performance_dfs = get_noise_performance_dfs(
         data_centric_methods=data_centric_methods,
         synthetic_models=synthetic_models,
         experiment_suite=noise_experiment_suite,

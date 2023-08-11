@@ -70,7 +70,7 @@ def calculate_rank_distance(
     if len(dataset_id) != 1:
         raise ValueError("Expected only one dataset_id")
     dataset_id = dataset_id[0]
-    max_df = max_df.sort_values("value", ascending=False)
+    max_df = max_df.sort_values("value", ascending=False) # type: ignore
     return spearmanr(original_ranking[dataset_id], max_df[rank_column]).statistic  # type: ignore
 
 
@@ -146,7 +146,7 @@ def get_model_ranking(overall_performance_df: pd.DataFrame) -> pd.DataFrame:
     # get model ranking of real data. Subset to only include the full data_segment
     # and evaluate based on roc auc
     real_data_model_ranking = (
-        overall_performance_df.query("synthetic_model_type == 'None'")
+        overall_performance_df.query("synthetic_model_type == 'None' & postprocessing_strategy != 'no_hard'")
         .groupby(["dataset_id", "classification_model_type_id"])
         .agg({"value": "mean"})
         .reset_index()
@@ -188,7 +188,7 @@ def get_model_ranking(overall_performance_df: pd.DataFrame) -> pd.DataFrame:
     # remove rows where synthetic_model_type is None and preprocessing_strategy is org_data
     # as their rank will always be 1
     ranked_df = ranked_df.query(
-        "not (synthetic_model_type == 'None' & preprocessing_strategy == 'org_data')",
+        "not (synthetic_model_type == 'None' & postprocessing_strategy != 'no_hard')",
     )
 
     return ranked_df

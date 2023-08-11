@@ -44,7 +44,7 @@ def poc_experiments_to_dataframe(experiments: List[POCExperiment]) -> pd.DataFra
         }
         for exp in experiments
     ]
-    df = pd.DataFrame.from_dict(exp_dict)
+    df = pd.DataFrame.from_dict(exp_dict) # type: ignore
     # add proportions
     df["Easy"] = df["n_easy"] / (df["n_easy"] + df["n_ambiguous"] + df["n_hard"])
     df["Ambiguous"] = df["n_ambiguous"] / (
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 # legend_box_margin=80,
                 legend_box_spacing=0.5,
             )
-            + pn.labs(x="Synthetic Model", y="Proportion")
+            + pn.labs(x="Generative Model", y="Proportion")
         )
 
         # plot proportion hard as line plot
@@ -130,7 +130,7 @@ if __name__ == "__main__":
                 # rotate x-axis labels
                 axis_text_x=pn.element_text(angle=45, hjust=1),
             )
-            + pn.labs(x="Synthetic Model", y="Proportion Hard")
+            + pn.labs(x="Generative Model", y="Proportion Hard")
         )
 
         # plot proportion hard as bar chart
@@ -153,7 +153,7 @@ if __name__ == "__main__":
                 axis_text_x=pn.element_text(angle=45, hjust=1),
                 legend_position="none",
             )
-            + pn.labs(x="Synthetic Model", y="Proportion Hard")
+            + pn.labs(x="Generative Model", y="Proportion Hard")
         ).save(plot_save_dir / "facet_proportion_hard.png", dpi=300)
 
         # plot proportion hard as bar chart only for cleanlab
@@ -181,7 +181,7 @@ if __name__ == "__main__":
                 text=pn.element_text(size=22),
                 panel_grid_major=pn.element_line(size=2),
             )
-            + pn.labs(x="Synthetic Model", y="Proportion Easy")
+            + pn.labs(x="Generative Model", y="Proportion Easy")
         )
         # prop_hard_cleanlab.save(plot_save_dir / "proportion_hard_cleanlab.png", dpi=300)
 
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             # color red and black
             + pn.scale_fill_manual(values=["#808080", "#cf1920"])
             + pn.scale_color_manual(values=["#808080", "#cf1920"])
-            + pn.ylim(0.8, 1)
+            + pn.ylim(0.95, 1)
             + pn.theme_minimal()
             + pn.theme(
                 # figure_size=(8, 6),
@@ -210,7 +210,7 @@ if __name__ == "__main__":
                 text=pn.element_text(size=22),
                 panel_grid_major=pn.element_line(size=2),
             )
-            + pn.labs(x="Synthetic Model", y="Inv. KL Divergence")
+            + pn.labs(x="Generative Model", y="Inv. KL Divergence")
         )
         # ploto auc as point plot only for cleanlab
         auc_cleanlab = (
@@ -237,11 +237,11 @@ if __name__ == "__main__":
                 text=pn.element_text(size=22),
                 panel_grid_major=pn.element_line(size=2),
             )
-            + pn.labs(x="Synthetic Model", y="AUC")
+            + pn.labs(x="Generative Model", y="AUC")
         )
 
         combined = create_patchwork_grid(
-            [inv_kl_divergence_cleanlab, auc_cleanlab, prop_hard_cleanlab],
+            [prop_hard_cleanlab, auc_cleanlab, inv_kl_divergence_cleanlab],
             single_plot_dimensions=(5, 3),
             n_in_row=3,
             fontsize="xx-large",
@@ -272,5 +272,5 @@ if __name__ == "__main__":
                 legend_title=pn.element_blank(),
                 legend_box_spacing=0.8,
             )
-            + pn.labs(x="Synthetic Model", y="Proportion")
+            + pn.labs(x="Generative Model", y="Proportion")
         ).save(plot_save_dir / "poc_proportions.png", dpi=300)

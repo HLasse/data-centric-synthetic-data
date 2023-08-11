@@ -1,25 +1,21 @@
 """Code to generate the main tables and plots for the main experiment."""
-from typing import List, Literal, Optional
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
 import plotnine as pn
 from plotnine.stats.stat_summary import mean_cl_boot
-from pydantic import BaseModel
 from wasabi import msg
 
 from application.constants import DATA_DIR, RESULTS_DIR
-from data_centric_synth.data_models.experiment3 import Experiment3Suite
-from data_centric_synth.evaluation.classification_performance import (
-    get_classification_performance_df,
-)
+from data_centric_synth.evaluation.data_objects import PerformanceDfs
 from data_centric_synth.evaluation.extraction import get_experiment3_suite
-from data_centric_synth.evaluation.feature_selection import (
-    get_feature_selection_performance,
+from data_centric_synth.evaluation.postprocessing_real_data_only import (
+    add_postprocessing_to_performance_dfs,
+    load_postprocessing_aggregated_statistical_fidelity,
+    load_postprocessing_performance_dfs,
 )
-from data_centric_synth.evaluation.model_selection import (
-    get_model_selection_performance_df,
-)
+from data_centric_synth.evaluation.summary_helpers import get_performance_dfs
 from data_centric_synth.experiments.models import (
     IMPLEMENTED_DATA_CENTRIC_METHODS,
     get_default_synthetic_model_suite,
@@ -135,45 +131,6 @@ def aggregate_and_make_pretty(
         )
 
     return round_and_combine(aggregated, digits=digits)
-
-
-class PerformanceDfs(BaseModel):
-    classification: pd.DataFrame
-    model_selection: pd.DataFrame
-    feature_selection: pd.DataFrame
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-def get_performance_dfs(
-    data_centric_methods: List[Literal[IMPLEMENTED_DATA_CENTRIC_METHODS]],
-    synthetic_models: List[str],
-    experiment_suite: Experiment3Suite,
-) -> PerformanceDfs:
-    classification_performance_df = get_classification_performance_df(
-        experiment_suite=experiment_suite,
-        synthetic_models=synthetic_models,
-        data_centric_methods=data_centric_methods,
-    )
-
-    model_selection_df = get_model_selection_performance_df(
-        experiment_suite=experiment_suite,
-        synthetic_models=synthetic_models,
-        data_centric_methods=data_centric_methods,
-    )
-
-    feature_selection_df = get_feature_selection_performance(
-        experiment_suite=experiment_suite,
-        synthetic_models=synthetic_models,
-        data_centric_methods=data_centric_methods,
-    )
-
-    return PerformanceDfs(
-        classification=classification_performance_df,
-        model_selection=model_selection_df,
-        feature_selection=feature_selection_df,
-    )
 
 
 def aggregate_performance_across_tasks(
@@ -351,7 +308,7 @@ if __name__ == "__main__":
     ]
     synthetic_models = [*get_default_synthetic_model_suite(), "None"]
 
-    #dataset_dirs = RESULTS_DIR / "experiment3" / "data"
+    # dataset_dirs = RESULTS_DIR / "experiment3" / "data"
     dataset_dirs = DATA_DIR / "main_experiment" / "data"
     plot_save_dir = RESULTS_DIR / "main_experiment" / "plots" / "summary"
     plot_save_dir.mkdir(parents=True, exist_ok=True)
@@ -363,10 +320,12 @@ if __name__ == "__main__":
     )
     performances_dfs = rename_easy_ambi_to_no_hard(performance_dfs)
     performance_dfs = rename_easy_ambiguous_hard_to_easy_ambi_hard(performance_dfs)
+    
 
     for data_centric_method in data_centric_methods:
         msg.divider(f"Data Centric Method: {data_centric_method}")
         ## Table 1: Performance across all datasets for baseline condition
+
         combined_unnormalized = aggregate_performance_across_tasks(
             classification_performance_df=performance_dfs.classification.query(
                 "data_centric_method == @data_centric_method & classification_model_type == 'XGBClassifier' & metric == 'roc_auc'"
@@ -401,6 +360,11 @@ if __name__ == "__main__":
             stat_fid = pd.read_csv(
                 RESULTS_DIR / "main_experiment" / "tmp" / "aggregated_stat_fid.csv"
             ).rename({"mean (lower, upper)": "Statistical fidelity"}, axis=1)
+            postprocessing_stat_fid_df = (
+                load_postprocessing_aggregated_statistical_fidelity(
+                    metric="inv_kl_divergence"
+                )
+            )
 
             combined_unnormalized = combined_unnormalized.merge(
                 stat_fid, how="left", on="Generative Model"
@@ -452,10 +416,7 @@ if __name__ == "__main__":
         if data_centric_method == "cleanlab":
             stat_fid = (
                 pd.read_csv(
-                    RESULTS_DIR
-                    / "main_experiment"
-                    / "tmp"
-                    / "normalized_stat_fid.csv"
+                    RESULTS_DIR / "main_experiment" / "tmp" / "normalized_stat_fid.csv"
                 )
                 .rename({"mean (lower, upper)": "Statistical fidelity"}, axis=1)
                 .set_index(
@@ -477,10 +438,10 @@ if __name__ == "__main__":
                 "data_centric_method == @data_centric_method & classification_model_type == 'XGBClassifier' & metric == 'roc_auc' & synthetic_model_type != 'None'"
             ),
             model_selection_df=performance_dfs.model_selection.query(
-                "data_centric_method == @data_centric_method"
+                "data_centric_method == @data_centric_method & synthetic_model_type != 'None'"
             ),
             feature_selection_df=performance_dfs.feature_selection.query(
-                "data_centric_method == @data_centric_method"
+                "data_centric_method == @data_centric_method & synthetic_model_type != 'None'"
             ),
             by_cols=[
                 "synthetic_model_type",

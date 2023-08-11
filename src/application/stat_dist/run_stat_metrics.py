@@ -6,15 +6,15 @@ from typing import Dict, Iterable, List, Literal
 
 import numpy as np
 import pandas as pd
-from wasabi import Printer
-
 from application.constants import (
     DATA_CENTRIC_THRESHOLDS,
     DATA_DIR,
     RESULTS_DIR,
     SYNTHETIC_MODEL_PARAMS,
 )
-from application.main_experiment.run_main_experiment import dataset_iterator
+from application.main_experiment.run_main_experiment import (
+    load_main_experiment_datasets,
+)
 from data_centric_synth.data_models.data_sculpting import (
     AlphaPrecisionMetrics,
     ProcessedData,
@@ -38,6 +38,7 @@ from data_centric_synth.experiments.statistical_fidelity import (
 )
 from data_centric_synth.serialization.serialization import save_to_pickle
 from data_centric_synth.utils import seed_everything
+from wasabi import Printer
 
 
 def run_stat_extraction_experiment(
@@ -192,7 +193,7 @@ if __name__ == "__main__":
         random_seeds = [random_seeds]
 
     main_statistical_metrics_experiments(
-        datasets=dataset_iterator(),
+        datasets=load_main_experiment_datasets(),
         save_dir=SAVE_DIR,
         random_seeds=random_seeds,
         synthetic_model_suite=get_default_synthetic_model_suite(),

@@ -2,7 +2,7 @@ from typing import Dict, Iterable, List, Union
 
 import pandas as pd
 import plotnine as pn
-from pandas.io.json._normalize import nested_to_record
+from pandas.io.json._normalize import nested_to_record # type: ignore
 from wasabi import msg
 
 from application.constants import RESULTS_DIR

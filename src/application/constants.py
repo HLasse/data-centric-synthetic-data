@@ -6,6 +6,9 @@ from pydantic import BaseModel
 ROOT_DIR = Path(__file__).parent.parent.parent
 RESULTS_DIR = ROOT_DIR / "results"
 DATA_DIR = ROOT_DIR / "data"
+POSTPROCESSING_ONLY_SAVE_DIR = DATA_DIR / "main_experiment" / "org_data_postprocessing"
+NOISE_DATASET_POSTPROCESSING_DIR = POSTPROCESSING_ONLY_SAVE_DIR / "covid"
+MAIN_EXP_POSTPROCESSING_DIR = POSTPROCESSING_ONLY_SAVE_DIR / "main_experiment"
 
 
 class DataCentricThresholds(BaseModel):

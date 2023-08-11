@@ -10,6 +10,16 @@ from data_centric_synth.experiments.models import get_default_synthetic_model_su
 from data_centric_synth.experiments.run_experiments import run_noise_experimental_loop
 from data_centric_synth.utils import seed_everything
 
+
+def load_covid_data() -> Experiment3Dataset:
+    X, y = load_and_preprocess_covid_dataset()
+    return Experiment3Dataset(
+        name="covid",
+        X=X,
+        y=y,
+    )
+
+
 if __name__ == "__main__":
     # SAVE_DIR = RESULTS_DIR / "experiment3" / "noise_data_covid"
     SAVE_DIR = DATA_DIR / "main_experiment" / "noise_data"
@@ -20,12 +30,7 @@ if __name__ == "__main__":
 
     random_seeds = np.random.randint(0, 10000, size=N_SEEDS)[:5]
 
-    X, y = load_and_preprocess_covid_dataset()
-    dataset = Experiment3Dataset(
-        name="covid",
-        X=X,
-        y=y,
-    )
+    dataset = load_covid_data()
 
     run_noise_experimental_loop(
         datasets=[dataset],

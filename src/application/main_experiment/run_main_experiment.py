@@ -9,8 +9,6 @@ from typing import Generator
 
 import numpy as np
 import pandas as pd
-from sklearn.calibration import LabelEncoder
-
 from application.constants import DATA_DIR, RESULTS_DIR
 from data_centric_synth.data_models.experiment3 import Experiment3Dataset
 from data_centric_synth.datasets.openml.openml_loaders import (
@@ -20,9 +18,10 @@ from data_centric_synth.datasets.openml.openml_loaders import (
 from data_centric_synth.experiments.models import get_default_synthetic_model_suite
 from data_centric_synth.experiments.run_experiments import run_main_experimental_loop
 from data_centric_synth.utils import seed_everything
+from sklearn.calibration import LabelEncoder
 
 
-def dataset_iterator() -> Generator[Experiment3Dataset, None, None]:
+def load_main_experiment_datasets() -> Generator[Experiment3Dataset, None, None]:
     """Iterate over the datasets and yield X and y. Only yield if the dataset
     has less than 100_000 rows and less than 50 columns"""
     for task in get_openml_benchmark_suite_task_ids(suite_id=337):
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     random_seeds = np.random.randint(0, 10000, size=N_SEEDS)
 
     run_main_experimental_loop(
-        datasets=dataset_iterator(),
+        datasets=load_main_experiment_datasets(),
         save_dir=SAVE_DIR,
         random_seeds=random_seeds,
         synthetic_model_suite=get_default_synthetic_model_suite(),

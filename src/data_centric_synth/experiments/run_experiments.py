@@ -4,6 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from application.constants import DATA_CENTRIC_THRESHOLDS, SYNTHETIC_MODEL_PARAMS
 from sklearn.base import ClassifierMixin
 from sklearn.metrics import (
     accuracy_score,
@@ -15,7 +16,6 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from wasabi import Printer
 
-from application.constants import DATA_CENTRIC_THRESHOLDS, SYNTHETIC_MODEL_PARAMS
 from data_centric_synth.causal_discovery.dagma import DAGMA_linear, evaluate_dag_model
 from data_centric_synth.data_models.data_sculpting import (
     DataSegments,
@@ -35,11 +35,15 @@ from data_centric_synth.data_sculpting.datacentric_sculpting import (
     get_datacentric_segments_from_sculpted_data,
     sculpt_data_by_method,
 )
+from data_centric_synth.datasets.simulated.simulate_data import flip_outcome
 from data_centric_synth.experiments.models import (
     IMPLEMENTED_DATA_CENTRIC_METHODS,
     get_default_classification_model_suite,
 )
-from data_centric_synth.experiments.statistical_fidelity import StatisticalFidelity
+from data_centric_synth.experiments.statistical_fidelity import (
+    StatisticalFidelity,
+    StatisticalFidelityMetrics,
+)
 from data_centric_synth.serialization.serialization import save_to_pickle
 from data_centric_synth.synthetic_data.synthetic_data_generation import (
     evaluate_detection_auc,
@@ -47,8 +51,6 @@ from data_centric_synth.synthetic_data.synthetic_data_generation import (
     generate_synth_data_from_sculpted_data,
 )
 from data_centric_synth.utils import seed_everything
-
-from data_centric_synth.datasets.simulated.simulate_data import flip_outcome
 
 
 def _roc_auc_score(
@@ -335,25 +337,27 @@ def fit_and_evaluate_model_on_original_data(
         sculpted_test_data=sculpted_test_data,
     )
     # convert to Experiment object
-    return full_model_evaluation_to_experiment(
+    return real_data_model_evaluation_to_experiment(
         data_centric_method=data_centric_method,
         percentile_threshold=percentile_threshold,
         data_centric_threshold=data_centric_threshold,
         random_state=random_state,
         test_data_segments=test_data_segments,
         model=model,
-        baseline_model_test_results=baseline_model_test_results,
+        model_eval_results=baseline_model_test_results,
     )
 
 
-def full_model_evaluation_to_experiment(
+def real_data_model_evaluation_to_experiment(
     data_centric_method: IMPLEMENTED_DATA_CENTRIC_METHODS,
     percentile_threshold: Optional[int],
     data_centric_threshold: Optional[float],
     random_state: int,
     test_data_segments: DataSegments,
     model: ClassifierMixin,
-    baseline_model_test_results: DataSegmentEvaluation,
+    model_eval_results: DataSegmentEvaluation,
+    postprocessing_strategy: str = "org_data",
+    statistical_fidelty: Optional[StatisticalFidelityMetrics] = None,
 ) -> Experiment3:
     """Save the results of a model trained on the original data to an Experiment
     object"""
@@ -367,12 +371,12 @@ def full_model_evaluation_to_experiment(
             statistical_fidelity=None,
         ),
         postprocessing=Processing(
-            strategy_name="org_data",
+            strategy_name=postprocessing_strategy,
             uncertainty_percentile_threshold=None,
             uncertainty_threshold=None,
             data_segments=None,
             detection_auc=None,
-            statistical_fidelity=None,
+            statistical_fidelity=statistical_fidelty,
         ),
         testprocessing=Processing(
             strategy_name=data_centric_method,
@@ -385,7 +389,7 @@ def full_model_evaluation_to_experiment(
         synthetic_model_type="None",
         classification_model_type=type(model).__name__,
         data_centric_method=data_centric_method,
-        classification_model_evaluation=baseline_model_test_results,
+        classification_model_evaluation=model_eval_results,
         random_seed=random_state,
         dag_evaluation=None,
     )
@@ -687,8 +691,6 @@ def run_main_experimental_loop(
                 save_to_pickle(syn_model_experiments, path=synth_file_name)
 
 
-
-
 def run_noise_experiment(
     X: pd.DataFrame,
     y: pd.Series,
@@ -731,13 +733,12 @@ def run_noise_experiment(
         X, y, test_size=0.2, random_state=random_state
     )
     # flip labels in the training data
-    y_train, _ = flip_outcome(y_train, prop_to_flip=noise_level) # type ignore
-
+    y_train, _ = flip_outcome(y_train, prop_to_flip=noise_level)  # type ignore
 
     # make synthetic datasets with different preprocessing strategies
     datasets = make_synthetic_datasets(
         X_train=X_train,
-        y_train=y_train,
+        y_train=y_train, # type: ignore
         synthetic_model=synthetic_model,
         synthetic_model_params=synthetic_model_params,
         data_centric_method=data_centric_method,
@@ -754,7 +755,7 @@ def run_noise_experiment(
     # train classification models on the synth (and real) data and evaluate on holdout data
     experiments = train_and_evaluate_models(
         X_train=X_train,
-        y_train=y_train,
+        y_train=y_train, # type: ignore
         preprocessed_datasets=datasets,
         postprocessed_datasets=postprocessed_datasets,
         X_test=X_test,
@@ -851,4 +852,3 @@ def run_noise_experimental_loop(
                             msg.fail(e)
                             continue
                     save_to_pickle(syn_model_experiments, path=synth_file_name)
-

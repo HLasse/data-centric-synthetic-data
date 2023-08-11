@@ -738,7 +738,7 @@ def run_noise_experiment(
     # make synthetic datasets with different preprocessing strategies
     datasets = make_synthetic_datasets(
         X_train=X_train,
-        y_train=y_train,
+        y_train=y_train, # type: ignore
         synthetic_model=synthetic_model,
         synthetic_model_params=synthetic_model_params,
         data_centric_method=data_centric_method,
@@ -755,7 +755,7 @@ def run_noise_experiment(
     # train classification models on the synth (and real) data and evaluate on holdout data
     experiments = train_and_evaluate_models(
         X_train=X_train,
-        y_train=y_train,
+        y_train=y_train, # type: ignore
         preprocessed_datasets=datasets,
         postprocessed_datasets=postprocessed_datasets,
         X_test=X_test,

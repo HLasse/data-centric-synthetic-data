@@ -15,13 +15,12 @@ from application.main_experiment.eval.summary_table import (
     rename_easy_ambiguous_hard_to_easy_ambi_hard,
 )
 from data_centric_synth.evaluation.extraction import get_experiment3_suite
+from data_centric_synth.evaluation.summary_helpers import get_performance_dfs
 from data_centric_synth.experiments.models import (
     IMPLEMENTED_DATA_CENTRIC_METHODS,
     get_default_synthetic_model_suite,
 )
 from statsmodels.regression.linear_model import RegressionResultsWrapper
-
-from data_centric_synth.evaluation.summary_helpers import get_performance_dfs
 
 
 def plot_density(df: pd.DataFrame) -> pn.ggplot:
@@ -153,11 +152,25 @@ if __name__ == "__main__":
         processing_estimates["task"] = task
         processing_estimates_dfs.append(processing_estimates)
         models.append(mdl)
+        print(f"Task: {task}")
+        print(mdl.summary().as_latex())
 
     processing_estimates_df = pd.concat(processing_estimates_dfs)
     processing_estimates_df["significant"] = (
         processing_estimates_df["p_value"] < 0.05
     ).astype(int)
+    processing_estimates_df = processing_estimates_df.rename(
+        {
+            "task": "Task",
+            "index": "Processing",
+            "estimate": "Estimate",
+            "std_err": "Std. Error",
+            "p_value": "p-value",
+            "significant": "Significant",
+        },
+        axis=1,
+    )
+    print(processing_estimates_df.set_index(["Task", "Processing"]).to_latex(float_format="%.3f"))
 
     # table of variability by dataset
     variability_by_dataset = (

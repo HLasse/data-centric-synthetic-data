@@ -70,7 +70,7 @@ def calculate_rank_distance(
     if len(dataset_id) != 1:
         raise ValueError("Expected only one dataset_id")
     dataset_id = dataset_id[0]
-    max_df = max_df.sort_values("value", ascending=False)
+    max_df = max_df.sort_values("value", ascending=False) # type: ignore
     return spearmanr(original_ranking[dataset_id], max_df[rank_column]).statistic  # type: ignore
 
 

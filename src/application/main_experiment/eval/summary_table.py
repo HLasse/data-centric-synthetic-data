@@ -320,12 +320,7 @@ if __name__ == "__main__":
     )
     performances_dfs = rename_easy_ambi_to_no_hard(performance_dfs)
     performance_dfs = rename_easy_ambiguous_hard_to_easy_ambi_hard(performance_dfs)
-    # add experiments with postprocessing of original data
-    postprocessing_dfs = load_postprocessing_performance_dfs()
-    performance_dfs = add_postprocessing_to_performance_dfs(
-        performance_dfs=performance_dfs,
-        postprocessing_dfs=postprocessing_dfs,
-    )
+    
 
     for data_centric_method in data_centric_methods:
         msg.divider(f"Data Centric Method: {data_centric_method}")

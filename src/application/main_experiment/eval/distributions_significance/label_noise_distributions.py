@@ -3,22 +3,21 @@ from typing import List
 import pandas as pd
 import plotnine as pn
 from application.constants import DATA_DIR, RESULTS_DIR
-from application.main_experiment.eval.noise_eval import (
-    aggregate_performance_across_tasks_no_merging,
-    rename_easy_ambi_to_no_hard,
-)
-from application.main_experiment.eval.reviews.main_distributions import (
+from application.main_experiment.eval.distributions_significance.main_distributions import (
     fit_lm,
     fit_lm_and_get_processing_estimates,
     plot_density,
 )
+from application.main_experiment.eval.noise_eval import (
+    aggregate_performance_across_tasks_no_merging,
+    rename_easy_ambi_to_no_hard,
+)
 from data_centric_synth.evaluation.extraction import get_experiment3_suite
+from data_centric_synth.evaluation.summary_helpers import get_noise_performance_dfs
 from data_centric_synth.experiments.models import (
     IMPLEMENTED_DATA_CENTRIC_METHODS,
     get_default_synthetic_model_suite,
 )
-
-from data_centric_synth.evaluation.summary_helpers import get_noise_performance_dfs
 
 if __name__ == "__main__":
     data_centric_methods: List[IMPLEMENTED_DATA_CENTRIC_METHODS] = [
@@ -123,11 +122,19 @@ if __name__ == "__main__":
         processing_estimates["task"] = task
         processing_estimates_dfs.append(processing_estimates)
 
-        mdl = fit_lm(
+        mdl_no_interaction = fit_lm(
+            df=tmp_df,
+            formula="mean ~ dataset_id + synthetic_model_type + preprocessing_strategy + postprocessing_strategy",
+        )
+
+        mdl_interaction = fit_lm(
             df=tmp_df, formula="mean ~ synthetic_model_type + dataset_id * pre_post"
         )
-        print(task)
-        print(mdl.summary())
+        print(f"***************{task}***************")
+        print("\n\n\nNo interaction")
+        print(mdl_no_interaction.summary().as_latex())
+        print("\n\n\nInteraction")
+        print(mdl_interaction.summary().as_latex())
 
     processing_estimates_df = pd.concat(processing_estimates_dfs)
     processing_estimates_df["significant"] = (
@@ -136,4 +143,20 @@ if __name__ == "__main__":
     processing_estimates_df = processing_estimates_df.query(
         "task != 'Statistical Fidelity'"
     )
-    print(processing_estimates_df.to_latex(index=False))
+
+    processing_estimates_df = processing_estimates_df.rename(
+        {
+            "task": "Task",
+            "index": "Processing",
+            "estimate": "Estimate",
+            "std_err": "Std. Error",
+            "p_value": "p-value",
+            "significant": "Significant",
+        },
+        axis=1,
+    )
+    print(
+        processing_estimates_df.set_index(["Task", "Processing"]).to_latex(
+            float_format="%.3f"
+        )
+    )

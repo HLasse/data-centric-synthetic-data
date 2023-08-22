@@ -40,7 +40,7 @@ from data_centric_synth.experiments.run_experiments import (
 )
 from data_centric_synth.serialization.serialization import save_to_pickle
 from data_centric_synth.utils import seed_everything
-
+import pandas as pd
 
 @dataclass
 class ImageExperimentDataset:
@@ -272,9 +272,12 @@ def postprocess_image_datasets(
     postprocessed_image_datasets: Dict[str, Dict[str, ProcessedImageDataset]] = defaultdict(dict)
 
     for name, preprocessed_data in preprocessed_datasets.items():
+        if isinstance(preprocessed_data.labels, torch.Tensor):
+            preprocessed_data.images = preprocessed_data.images.numpy() # type: ignore
+            preprocessed_data.labels = preprocessed_data.labels.numpy()
         sculpted_synth_data = sculpt_image_data_with_cleanlab(
-            X=preprocessed_data.images.numpy(),
-            y=preprocessed_data.labels.numpy(),
+            X=preprocessed_data.images,
+            y=preprocessed_data.labels,
         )
         # strategy 1: no postprocessing
         postprocessed_image_datasets[name]["baseline"] = extract_subset_from_sculpted_image_data(
@@ -297,7 +300,8 @@ def evaluate_image_model(
         X_test: np.ndarray,
         y_test: np.ndarray,
 ) -> DataSegmentEvaluation:
-    pred_probs = model.predict_proba(X_test)[:, 1] # type: ignore
+    X_test_df = pd.DataFrame(X_test, columns=[f"X{n}" for n in range(X_test.shape[1])])
+    pred_probs = model.predict_proba(X_test_df)[:, 1] # type: ignore
     metrics = calculate_metrics(y=y_test, y_pred_probs=pred_probs)
     feature_importances = (
         dict(
@@ -326,7 +330,8 @@ def fit_and_evaluate_image_model_on_original_data(
         model: Any,
         random_state: int,
 ) -> Experiment3:
-    model.fit(X_train, y_train)
+    X_train_df = pd.DataFrame(X_train, columns=[f"X{n}" for n in range(X_train.shape[1])])
+    model.fit(X_train_df, y_train)
     model_performance = evaluate_image_model(model=model, X_test=X_test, y_test=y_test)
     return real_data_model_evaluation_to_experiment(
         data_centric_method="cleanlab",
@@ -399,12 +404,15 @@ def train_and_evaluate_image_models(
             # train classification model suite on synthetic data
             for model in classification_models:
                 # train model on synthetic data and evaluate on test data
+                X_flattened = flatten_images_to_1D(postprocessed_data.images)
+                X_train_df = pd.DataFrame(X_flattened, columns=[f"X{n}" for n in range(X_flattened.shape[1])])
+
                 model.fit(  # type: ignore
-                    flatten_images_to_1D(postprocessed_data.images),
+                    X_train_df,
                     postprocessed_data.labels,
                 )
                 # evaluate on full test data
-                model_eval = evaluate_image_model(model=model, X_test=X_test, y_test=y_test)
+                model_eval = evaluate_image_model(model=model, X_test=X_test_1D, y_test=y_test)
                 
                 experiments.append(
                     Experiment3(
@@ -493,7 +501,7 @@ def run_image_experiment_loop(
                     run_image_experiment(
                         dataset=dataset,
                         generative_model=generative_model,
-                        generative_model_params={"n_iter": 10},
+                        generative_model_params={},
                         random_state=random_seed,
                     ),
                 )
@@ -505,7 +513,7 @@ if __name__ == "__main__":
 
     SAVE_DIR = DATA_DIR / "image_experiment" / "breast_mnist"
     SAVE_DIR.mkdir(exist_ok=True, parents=True)
-    N_SEEDS = 1
+    N_SEEDS = 2
     STARTING_SEED = 42
     seed_everything(seed=STARTING_SEED)
 

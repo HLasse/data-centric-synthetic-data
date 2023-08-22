@@ -513,11 +513,11 @@ if __name__ == "__main__":
 
     SAVE_DIR = DATA_DIR / "image_experiment" / "breast_mnist"
     SAVE_DIR.mkdir(exist_ok=True, parents=True)
-    N_SEEDS = 2
+    N_SEEDS = 5
     STARTING_SEED = 42
     seed_everything(seed=STARTING_SEED)
 
-    random_seeds = np.random.randint(0, 10000, size=N_SEEDS)
+    random_seeds = np.random.randint(0, 10000, size=10)[:N_SEEDS]
 
     run_image_experiment_loop(
         datasets=[load_breast_mnist(split="train")],
@@ -526,29 +526,3 @@ if __name__ == "__main__":
         generative_model_suite=get_image_generative_model_suite(),
     )
 
-    # dataset = load_breast_mnist(split="train")
-    # cl = CleanLearning(model_skorch)
-    # _ = cl.fit(X=dataset.X, y=dataset.y)
-    # label_issues = cl.get_label_issues()
-
-    # dataloader = ImageDataLoader(
-    #     MedNistDataset(X=dataset.X, y=dataset.y),
-    #     random_state=42,
-    #     height=32,
-    # )
-    # generator = Plugins().get(
-    #     "image_cgan", batch_size=100, plot_progress=True, n_iter=1
-    # )
-    # generator.fit(dataloader)
-
-    # syn_samples, syn_labels = generator.generate(count=5).unpack().tensors()
-    # from torchvision.transforms import Resize
-
-    # resizer = Resize((dataset.org_height, dataset.org_height))
-    # syn_samples = resizer(syn_samples)
-    # resizer = Resize((dataset.org_height, dataset.org_height))
-    # syn_samples = resizer(syn_samples)
-    # resizer = Resize((dataset.org_height, dataset.org_height))
-    # syn_samples = resizer(syn_samples)
-    # resizer = Resize((dataset.org_height, dataset.org_height))
-    # syn_samples = resizer(syn_samples)

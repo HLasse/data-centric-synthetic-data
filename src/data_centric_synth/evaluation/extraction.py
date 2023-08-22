@@ -37,7 +37,7 @@ class ClassificationModelPerformance(BaseModel):
     ) -> Optional[PerformanceEvaluation]:
         """Get the performance for a specific data segment."""
         performance = getattr(self.data_segment_evaluation, data_segment)
-        if performance.metrics is not None:
+        if performance is not None and performance.metrics is not None:
             return performance
         return PerformanceEvaluation(
             metrics=Metrics(

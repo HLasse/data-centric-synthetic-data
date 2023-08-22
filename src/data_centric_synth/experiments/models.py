@@ -37,5 +37,7 @@ def get_default_synthetic_model_suite() -> List[str]:
         "ddpm",
     ]
 
+def get_image_generative_model_suite() -> List[str]:
+    return ["image_adsgan", "image_cgan"]
 
 IMPLEMENTED_DATA_CENTRIC_METHODS = Literal["dataiq", "datamaps", "cleanlab"]

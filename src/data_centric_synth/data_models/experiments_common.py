@@ -68,9 +68,9 @@ class DataSegmentEvaluation(BaseModel):
     """Results from evaluating a single experiment on all data segments."""
 
     full: PerformanceEvaluation
-    easy: PerformanceEvaluation
+    easy: Optional[PerformanceEvaluation]
     ambiguous: Optional[PerformanceEvaluation]
-    hard: PerformanceEvaluation
+    hard: Optional[PerformanceEvaluation]
 
 
 class SimulatedData(BaseModel):

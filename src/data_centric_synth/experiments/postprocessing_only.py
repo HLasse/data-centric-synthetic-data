@@ -2,14 +2,14 @@ from pathlib import Path
 from typing import List, Literal
 
 import pandas as pd
+from sklearn.base import ClassifierMixin
+from wasabi import Printer
+
 from application.constants import DATA_CENTRIC_THRESHOLDS, MAIN_EXP_POSTPROCESSING_DIR
 from application.main_experiment.run_main_experiment import (
     load_main_experiment_datasets,
 )
 from application.main_experiment.run_noise_experiment import load_covid_data
-from sklearn.base import ClassifierMixin
-from wasabi import Printer
-
 from data_centric_synth.data_models.data_sculpting import ProcessedData
 from data_centric_synth.data_models.experiment3 import Experiment3
 from data_centric_synth.data_sculpting.datacentric_sculpting import (
@@ -253,7 +253,7 @@ def train_and_evaluate_postprocessing_on_real_data_only(
                 model=model,
                 model_eval_results=model_eval,
                 postprocessing_strategy="no_hard",
-                statistical_fidelty=statistical_fidelity,
+                statistical_fidelity=statistical_fidelity,
             )
         )
     return experiments

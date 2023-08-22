@@ -1,4 +1,5 @@
 """Dataclasses related to data-centric sculpting/stratifying"""
+from dataclasses import dataclass
 from typing import Any, Optional
 
 import numpy as np
@@ -14,6 +15,14 @@ class StratifiedIndices(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+
+@dataclass
+class SculptedImageData:
+    X_easy: np.ndarray
+    X_hard: np.ndarray
+    y_easy: np.ndarray
+    y_hard: np.ndarray
+    indices: StratifiedIndices
 
 class SculptedData(BaseModel):
     X_easy: pd.DataFrame
@@ -70,4 +79,5 @@ class ProcessedData(BaseModel):
     detection_auc: Optional[float]
 
     class Config:
+        arbitrary_types_allowed = True
         arbitrary_types_allowed = True

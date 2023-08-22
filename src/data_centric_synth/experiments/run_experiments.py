@@ -4,7 +4,6 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from application.constants import DATA_CENTRIC_THRESHOLDS, SYNTHETIC_MODEL_PARAMS
 from sklearn.base import ClassifierMixin
 from sklearn.metrics import (
     accuracy_score,
@@ -16,6 +15,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from wasabi import Printer
 
+from application.constants import DATA_CENTRIC_THRESHOLDS, SYNTHETIC_MODEL_PARAMS
 from data_centric_synth.causal_discovery.dagma import DAGMA_linear, evaluate_dag_model
 from data_centric_synth.data_models.data_sculpting import (
     DataSegments,
@@ -244,7 +244,6 @@ def train_and_evaluate_models(
                 model=model,
             ),
         )
-    ## train DAG model on original data as reference
 
     # train models on synthetic data and evaluate on test data
     for preprocessing_strategy in postprocessed_datasets:
@@ -353,11 +352,11 @@ def real_data_model_evaluation_to_experiment(
     percentile_threshold: Optional[int],
     data_centric_threshold: Optional[float],
     random_state: int,
-    test_data_segments: DataSegments,
+    test_data_segments: Optional[DataSegments],
     model: ClassifierMixin,
     model_eval_results: DataSegmentEvaluation,
     postprocessing_strategy: str = "org_data",
-    statistical_fidelty: Optional[StatisticalFidelityMetrics] = None,
+    statistical_fidelity: Optional[StatisticalFidelityMetrics] = None,
 ) -> Experiment3:
     """Save the results of a model trained on the original data to an Experiment
     object"""
@@ -376,7 +375,7 @@ def real_data_model_evaluation_to_experiment(
             uncertainty_threshold=None,
             data_segments=None,
             detection_auc=None,
-            statistical_fidelity=statistical_fidelty,
+            statistical_fidelity=statistical_fidelity,
         ),
         testprocessing=Processing(
             strategy_name=data_centric_method,

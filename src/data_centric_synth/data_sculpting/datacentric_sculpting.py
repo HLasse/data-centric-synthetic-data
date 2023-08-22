@@ -306,6 +306,7 @@ def sculpt_with_cleanlab(
     X: pd.DataFrame,
     y: pd.Series,
     data_centric_threshold: Optional[float],
+    model = XGBClassifier(),
 ) -> SculptedData:
     """Sculpt the given data with Cleanlab. Uses the Cleanlab model to stratify the
     data into easy and hard examples. Note that cleanlab does not have a notion of
@@ -318,7 +319,7 @@ def sculpt_with_cleanlab(
             easy/ambiguous/hard split.
     """
 
-    label_issues = get_cleanlab_label_issue_df(X=X, y=y)
+    label_issues = get_cleanlab_label_issue_df(X=X, y=y, model=model)
     if data_centric_threshold is None:
         easy_indices = np.where(~label_issues["is_label_issue"])[0]
         hard_indices = np.where(label_issues["is_label_issue"])[0]
@@ -343,14 +344,15 @@ def sculpt_with_cleanlab(
     )
 
 
-def get_cleanlab_label_issue_df(X: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
-    model = XGBClassifier()
+def get_cleanlab_label_issue_df(X: pd.DataFrame, y: pd.Series, model = XGBClassifier()) -> pd.DataFrame:
     cl = CleanLearning(model)
     _ = cl.fit(X, y)
     label_issues = cl.get_label_issues()
     if label_issues is None:
         raise ValueError("Model not fit?")
     return label_issues
+
+
 
 
 def sculpt_data_by_method(

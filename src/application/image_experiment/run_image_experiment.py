@@ -222,8 +222,12 @@ def make_synthetic_image_datasets(
     y_train: np.ndarray,
     generative_model: str,
     generative_model_params: Dict[str, Any],
+    flip_label_prop: float
 ) -> Dict[str, ProcessedImageDataset]:
     
+    # flip 5% labels in y_train 
+    y_train = np.where(np.random.rand(len(y_train)) < flip_label_prop, 1 - y_train, y_train)
+
     sculpted_data = sculpt_image_data_with_cleanlab(
         X=X_train,
         y=y_train,
@@ -440,12 +444,14 @@ def run_image_experiment(
     X_train, X_test, y_train, y_test = make_image_train_test_split(
         dataset=dataset, test_size=0.2, random_state=random_state
     )
+    
     # preprocess the data
     preprocessed_datasets = make_synthetic_image_datasets(
         X_train=X_train,
         y_train=y_train,
         generative_model=generative_model,
         generative_model_params=generative_model_params,
+        flip_label_prop=0.05
     )
     # apply postprocessing
     postprocessed_datasets = postprocess_image_datasets(

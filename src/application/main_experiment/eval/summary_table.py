@@ -4,9 +4,6 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 import plotnine as pn
-from plotnine.stats.stat_summary import mean_cl_boot
-from wasabi import msg
-
 from application.constants import DATA_DIR, RESULTS_DIR
 from data_centric_synth.evaluation.data_objects import PerformanceDfs
 from data_centric_synth.evaluation.extraction import get_experiment3_suite
@@ -19,7 +16,10 @@ from data_centric_synth.evaluation.summary_helpers import get_performance_dfs
 from data_centric_synth.experiments.models import (
     IMPLEMENTED_DATA_CENTRIC_METHODS,
     get_default_synthetic_model_suite,
+    get_image_generative_model_suite,
 )
+from plotnine.stats.stat_summary import mean_cl_boot
+from wasabi import msg
 
 
 def mean_cl_boot_wrapper(x: np.ndarray) -> pd.DataFrame:
@@ -245,7 +245,7 @@ def aggregated_table_to_latex(aggregated_table: pd.DataFrame) -> None:
     """Convert aggregated table to latex with a midrule after each synthetic model type
     and vpace to separate preprocessing conditions"""
     latex_str = aggregated_table.to_latex()
-    add_midrule_before_occurences = [*get_default_synthetic_model_suite(), "None"]
+    add_midrule_before_occurences = [*get_default_synthetic_model_suite(), *get_image_generative_model_suite(), "None"]
     # add midrule before each occurence of synthetic model type
     for synthetic_model_type in add_midrule_before_occurences:
         latex_str = latex_str.replace(

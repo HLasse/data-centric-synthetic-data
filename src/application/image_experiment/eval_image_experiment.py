@@ -2,7 +2,6 @@ from typing import List
 
 import pandas as pd
 import plotnine as pn
-
 from application.constants import DATA_DIR, RESULTS_DIR
 from application.main_experiment.eval.distributions_significance.main_distributions import (
     fit_lm,
@@ -12,6 +11,7 @@ from application.main_experiment.eval.distributions_significance.main_distributi
 from application.main_experiment.eval.summary_table import (
     aggregate_performance_across_tasks,
     aggregate_performance_across_tasks_no_merging,
+    aggregated_table_to_latex,
 )
 from data_centric_synth.evaluation.extraction import get_experiment3_suite
 from data_centric_synth.evaluation.summary_helpers import get_performance_dfs
@@ -22,12 +22,15 @@ if __name__ == "__main__":
     generative_models = [*get_image_generative_model_suite(), "None"]
 
     IMAGE_DATA_DIR = DATA_DIR / "image_experiment" / "breast_mnist"
-    PLOT_SAVE_DIR = RESULTS_DIR / "image_experiment" / "plots"  
-    experiment_suite =  get_experiment3_suite(IMAGE_DATA_DIR)
+    PLOT_SAVE_DIR = RESULTS_DIR / "image_experiment" / "plots"
+    experiment_suite = get_experiment3_suite(IMAGE_DATA_DIR)
 
-    performance_dfs = get_performance_dfs(data_centric_methods=data_centric_methods, synthetic_models=generative_models, experiment_suite=experiment_suite)
-    
-    
+    performance_dfs = get_performance_dfs(
+        data_centric_methods=data_centric_methods,
+        synthetic_models=generative_models,
+        experiment_suite=experiment_suite,
+    )
+
     combined_unnormalized = aggregate_performance_across_tasks(
         classification_performance_df=performance_dfs.classification.query(
             "classification_model_type == 'XGBClassifier' & metric == 'roc_auc'"
@@ -42,7 +45,20 @@ if __name__ == "__main__":
         normalize=False,
         normalize_index_col="",
     )
-    combined_unnormalized
+
+    combined_unnormalized = combined_unnormalized[
+        ["Classification", "Feature Selection", "Model Selection"]
+    ].reset_index().rename(
+        columns={
+            "synthetic_model_type": "Generative Model",
+            "preprocessing_strategy": "Preprocessing Strategy",
+            "postprocessing_strategy": "Postprocessing Strategy",
+        }
+    ).set_index(
+        ["Generative Model", "Preprocessing Strategy", "Postprocessing Strategy"]
+    )
+
+    print(aggregated_table_to_latex(combined_unnormalized))
 
     no_agg = (
         aggregate_performance_across_tasks_no_merging(
@@ -67,9 +83,7 @@ if __name__ == "__main__":
     )
 
     no_agg["pre_post"] = (
-        no_agg["preprocessing_strategy"]
-        + " - "
-        + no_agg["postprocessing_strategy"]
+        no_agg["preprocessing_strategy"] + " - " + no_agg["postprocessing_strategy"]
     )
 
     processing_estimates_dfs: List[pd.DataFrame] = []

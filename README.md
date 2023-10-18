@@ -11,7 +11,7 @@ Clone the repository to your computer, create a new virtual environment, and ins
 
 
 ```bash
-git clone <URL OF REPO>
+git clone https://github.com/HLasse/data-centric-synthetic-data
 cd data-centric-synth
 pip install -e .
 ## if this fails, install torch before installing the library

@@ -1,6 +1,6 @@
 # Data-centric Synthetic Data Generation
 
-Code for the paper [*"Reimagining Synthetic Data Generation through Data-Centric AI: A Comprehensive Benchmark"*](https://neurips.cc/virtual/2023/poster/73527).
+Code for the paper [*"Reimagining Synthetic Data Generation through Data-Centric AI: A Comprehensive Benchmark"*](https://neurips.cc/virtual/2023/poster/73527) accepted at NeurIPS 2023.
 
 
 ## Replicating the paper's results

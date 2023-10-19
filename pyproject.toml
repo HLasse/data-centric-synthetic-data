@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "data-centric-synth"
 version = "0.0.0"
-authors = [{ name = "Anon", email = "Anon@anon.com" }]
-description = "Data Centric Synth"
+authors = [{ name = "Lasse Hansen", email = "lasseh0310@gmail.com" }]
+description = "Data Centric Synthetic Data"
 classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS :: MacOS X",

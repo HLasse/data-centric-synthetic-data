@@ -102,5 +102,15 @@ An overview of the content of `src` can be found below
 │   └── utils.py # utility for setting random seed globally
 ```
 
-
+---
+# Citing
+```
+@inproceedings
+{hansen2023datasynth,
+title={Reimagining Synthetic Data Generation through Data-Centric AI: A Comprehensive Benchmark},
+author={Hansen, Lasse and Seedat, Nabeel and van der Schaar, Mihaela and Petrovic, Andrija},
+booktitle={Thirty-seventh Conference on Neural Information Processing Systems (Datasets and Benchmarks)},
+year={2023}
+}
+```
 

@@ -34,6 +34,8 @@ name = "MIT"
 
 [project.optional-dependencies]
 dev = [
+  "nbconvert",
+  "nbformat",
   "pylint",
   "mypy",
   "pre-commit==3.3.2",
